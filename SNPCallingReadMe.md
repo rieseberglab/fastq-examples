@@ -25,7 +25,30 @@ Functionality of SnpCallingScript.py
     the top-level scripts and ehawke.py.
     #    --help: display help messages  
 ```
-
+Design of the Script
+===============================
+  - Entry point of the module is : 
+  ```python
+  class SnpCallSeparateExecutioner
+  ```
+  - upper level ehawke.py instantiates the class with parsed information from command line input
+    Instance of one experiment cannot be reused for other experiments as it contains metadata of the initial experiment.
+  ```python
+  def __init__( self, sampleList, expName, config, options)
+  ```
+  - Overarching member Function is 
+  ```python
+  def runExperiment( self )
+  ```
+  Where based on the user's options, some combinations of followingg functions will be called:
+  ```python
+  def SetUpEnvironment( self )
+  def ExecuteExperiment( self )
+  def ExportResults( self )
+  def TestRun( self )
+  ```
+  Note: TestRun( self ) deals with "--test" option but it is just a wrapper of a non-member function TestRunWithShortenedFastq() where
+  the experiments and data to be run on is pre-coded to the folder containing the shortened fastq samples.
 To-Do:
 ================================
     - Integrate with ehawke.py where each experiment is instantiated as a SnpCallingExperiment variable such that ehawke.py could
