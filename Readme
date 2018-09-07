@@ -1,8 +1,0 @@
-This folder contains sample files for quick testing of various stages of the data workflow. The script that generates all the data sample files could be found at: ./scripts/generateFastQSample.py. 
-
-The help of arguments for the script could be found:
-python generateFastqSample.py -h
-
-Sample usage is :
-python generateFastqSample.py 10 DBGBGBS_GB334_R1 DBGBGBS_GB334_R2
-(Where DBGBGBS_GB334_R1 and DBGBGBS_GB334_R2 are two decompressed data files located in the same folder with the script)
