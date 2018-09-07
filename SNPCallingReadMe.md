@@ -55,3 +55,4 @@ To-Do:
     - Integrate with ehawke.py where each experiment is instantiated as a SnpCallingExperiment variable such that ehawke.py could
     owns all the meta-data of each separated experiments.
     - Test with shortened fastq samples files to finish the --test option.
+    - Add Actual Usage Examples to this documentation once the integration is finished
