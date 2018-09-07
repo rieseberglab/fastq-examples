@@ -49,6 +49,7 @@ Design of the Script
   ```
   Note: TestRun( self ) deals with "--test" option but it is just a wrapper of a non-member function TestRunWithShortenedFastq() where
   the experiments and data to be run on is pre-coded to the folder containing the shortened fastq samples.
+  
 To-Do:
 ================================
     - Integrate with ehawke.py where each experiment is instantiated as a SnpCallingExperiment variable such that ehawke.py could
