@@ -1,3 +1,24 @@
+#!/usr/bin/env python3
+
+"""
+  Generate a smaller fastq sample from a pair of R1 and R2 files with user specified sizes.
+  Randomly sampled entries from corresponding R1 and R2 data files are write and compressed to two
+  new gunzip files 
+  Input:
+    -n : number of entries to be sampled from the input data files
+    -R1: Gunzip file for the R1 data file
+    -R2: Gunzip file for the R2 data file
+  output:
+    -R1.shorten and R2.shorten files are the compressed sampling files
+    - Modified shortenedFastqSamples.yaml : where the newly produced shortened sample files are recorded
+
+  Ex:
+   ./generateFastqSample 100 DBGBHB_4360_R1.gz DBGBHB_4350_R2.gz
+
+  More Help:
+   ./generateFastqSample --help 
+
+"""
 import argparse
 import random
 import pdb
