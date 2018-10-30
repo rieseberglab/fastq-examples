@@ -35,7 +35,6 @@ def each_read(filename):
     with open(filename, "r") as fil:
         buf = []
         for line in fil:
-            line = fil.readline()
             if not line: break
             buf.append(line)
             if len(buf) == ROWSPerEntry:
@@ -43,6 +42,10 @@ def each_read(filename):
                 buf = []
         if len(buf) != 0:
             raise Exception("Input doesn't have multiple of %d lines." % ROWSPerEntry)
+
+
+def show_progress(total, kept):
+    sys.stderr.write("Processed %12d reads. Kept %12d reads.\n" % (total, kept))
 
 def main():
     #
@@ -68,14 +71,24 @@ def main():
     fR1 = each_read(R1)
     fR2 = each_read(R2)
 
+    count = 0
+    kept = 0
     for r1_read in fR1:
-        r2_read = fR2.next()
+        r2_read = next(fR2)
+        count +=1
+        if count % 10000 == 0:
+            show_progress(count, kept)
+
         progress += every_n
         if progress >= 1.0:
+            # keep
             fR1New.write("".join(r1_read))
             fR2New.write("".join(r2_read))
             progress -= 1.0
-     
+            kept += 1
+
+    show_progress(count, kept)
+    
     #
     #Wrap-Up
     #
