@@ -1,85 +1,86 @@
 #!/usr/bin/env python3
 
-"""
+"""Select a subset of read from the input fastq files R1 and R2.
+   This script assumes that the two files provide homologous reads in the same order.
+
   Generate a smaller fastq sample from a pair of R1 and R2 files with user specified sizes.
-  Randomly sampled entries from corresponding R1 and R2 data files are write and compressed to two
-  new gunzip files 
-  Input:
-    -n : number of entries to be sampled from the input data files
-    -R1: Gunzip file for the R1 data file
-    -R2: Gunzip file for the R2 data file
+
+     generateFastqSample PCT R1 R2 3>R3 4>R4
+
+  Parameters:
+
+     PCT size of output in relation to input, in percent. e.g. `10`
+         means 1 out of every 10 reads is kept.
+
+     R1  is the forward reads (input)
+     R2  reverse reads (input)
+
   output:
-    -R1.shorten and R2.shorten files are the compressed sampling files
-    - Modified shortenedFastqSamples.yaml : where the newly produced shortened sample files are recorded
+
+     Selected reads from R1 are output to FD 3
+     Selected reads from R2 are output to FD 4
 
   Ex:
-   ./generateFastqSample 100 DBGBHB_4360_R1.gz DBGBHB_4350_R2.gz
-
-  More Help:
-   ./generateFastqSample --help 
-
+   ./generateFastqSample 10  <(gzip -d -c DBGBHB_4360_R1.gz) \
+                             <(gzip -d -c DBGBHB_4350_R2.gz) \
+                          3> >(gzip > smaller_R1.gz) \
+                          4> >(gzip > smaller_R2.gz)
 """
 import argparse
-import random
-import pdb
-from datetime import datetime
+import os
+import sys
 
-#
-#parse Command line input
-#
+def each_read(filename):
+    ROWSPerEntry = 4
+    with open(filename, "r") as fil:
+        buf = []
+        for line in fil:
+            line = fil.readline()
+            if not line: break
+            buf.append(line)
+            if len(buf) == ROWSPerEntry:
+                yield buf
+                buf = []
+        if len(buf) != 0:
+            raise Exception("Input doesn't have multiple of %d lines." % ROWSPerEntry)
+
 def main():
-   parser = argparse.ArgumentParser()
-   parser.add_argument( "sampleCount", \
-     help = "Number of entries to be write into the sample file" )
-   parser.add_argument( "r1", \
-     help = "Full Address to decompressed R1 file" ) 
-   parser.add_argument( "r2", \
-     help = "Full Address to decompressed R2 file" )
-   args = parser.parse_args()
-   R1 = args.r1
-   R2 = args.r2
-   SAMPLECOUNT = int(args.sampleCount)
-   print( "R1 file is :", R1 )
-   print( "R2 file is :", R2 )
-   random.seed(datetime.now())
-   ROWSPerEntry = 4
+    #
+    #parse Command line input
+    #
+    parser = argparse.ArgumentParser()
+    parser.add_argument("PCT", help="Size of output in percentage, relative to input size.")
+    parser.add_argument("r1",  help="Fast Q paired end forward stream.")
+    parser.add_argument("r2",  help="Fast Q paired end reverse stream.")
 
-   #Address to decompressed sample files
-   sampleIndexes = []
-   POSTFIX = ".shorten"
-   fR1New = open( "./shortenedSamples/" + R1 + POSTFIX, "w+")
-   fR2New = open( "./shortenedSamples/" + R2 + POSTFIX, "w+")
-   #
-   #Read and Parse the compressed files
-   #
-   with open( R1,'r' ) as fR1:
-     flines = fR1.readlines()
-     rowCount = len( flines )
-     dataCount = int(rowCount/ROWSPerEntry)
-     #Generate array of Random Indexes# 
-     assert SAMPLECOUNT <= dataCount, "Sampling size is bigger than input file size"
-     sampleIndexes = random.sample( range(0,dataCount-1),SAMPLECOUNT )
-     for i in sampleIndexes:
-       for j in range( ROWSPerEntry ):
-         lineNumToWrite = i*ROWSPerEntry + j
-         fR1New.write( flines[lineNumToWrite] ) 
+    args = parser.parse_args()
+    R1 = args.r1
+    R2 = args.r2
+    PCT = float(args.PCT)
+    if PCT < 0.0 or PCT > 100.0:
+        raise Exception("Invalid percentage.")
+    
+    every_n = PCT / 100.00
+    progress = 0.0
 
-   with open( R2,'r' ) as fR2:
-     flines = fR2.readlines()
-     rowCount = len( flines )
-     dataCount = int(rowCount/ROWSPerEntry)
-     #Generate array of Random Indexes# 
-     assert SAMPLECOUNT <= dataCount, "Sampling size is bigger than input file size"
-     for i in sampleIndexes:
-       for j in range( ROWSPerEntry ):
-         lineNumToWrite = i*ROWSPerEntry + j
-         fR2New.write( flines[lineNumToWrite] ) 
+    fR1New = os.fdopen(3, "w")
+    fR2New = os.fdopen(4, "w")
+    fR1 = each_read(R1)
+    fR2 = each_read(R2)
+
+    for r1_read in fR1:
+        r2_read = fR2.next()
+        progress += every_n
+        if progress >= 1.0:
+            fR1New.write("".join(r1_read))
+            fR2New.write("".join(r2_read))
+            progress -= 1.0
      
-   #
-   #Wrap-Up
-   #
-   fR1New.close()
-   fR2New.close()
+    #
+    #Wrap-Up
+    #
+    fR1New.close()
+    fR2New.close()
 
 if __name__ == "__main__":
     main()
