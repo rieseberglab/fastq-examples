@@ -22,8 +22,10 @@ Large FastQ files can be reduced in size using the provided script.
   - Run the Script to generate two new sample files which preserve 5% of the original reads:
 
      ```bash
+        # generateFastqSample.py PCT_TO_KEEP R1READS_FULL R2READS_FULL 3> R1READS_SMALL 4> R2READS_SMALL
+        #
         ./generateFastqSample.py 5  <(gzip -d full_R1.fastq.gz) \
-                                    <(gzip -d full_13.ANN0813_R2.fastq.gz) \
+                                    <(gzip -d full_R2.fastq.gz) \
                                    3> >(gzip -c short_R1.fastq.gz) \
                                    4> >(gzip -c short_R2.fastq.gz)
 
