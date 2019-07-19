@@ -9,8 +9,8 @@
 
   Parameters:
 
-     PCT size of output in relation to input, in percent. e.g. `10`
-         means 1 out of every 10 reads is kept.
+     PCT size of output in relation to input, in percent. e.g. `5`
+         means keep 5%%, i.e. 1 out of every 20 reads is kept.
 
      R1  is the forward reads (input)
      R2  reverse reads (input)
